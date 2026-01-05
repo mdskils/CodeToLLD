@@ -1,508 +1,183 @@
-\# Business Requirement Document (BRD)
-
-
-
-\## Introduction
-
-
-
-This document outlines the business requirements for the PACER Release Request Application, a .NET web application designed to manage, process, and track PACER (Public Access to Court Electronic Records) release requests. The purpose of this document is to provide a comprehensive overview of the system’s objectives, functionality, architecture, and workflows, ensuring alignment between business stakeholders and technical teams. The scope includes all major modules, business logic, data flows, and system dependencies as derived from the provided .NET codebase.
-
-
+```markdown
+# Business Requirement Document (BRD) for PACER Page Request System
 
 ---
 
+## Introduction
 
-
-\## Business Objectives
-
-
-
-\- Streamline the submission, review, and approval process for PACER release requests.
-
-\- Enable efficient management of product and SKU data associated with requests.
-
-\- Facilitate secure and auditable user interactions, including file uploads and data exports.
-
-\- Provide robust validation, error handling, and notification mechanisms to ensure data integrity and user guidance.
-
-\- Support reporting and data export for business analysis and compliance.
-
-\- Ensure scalability, security, and maintainability of the application.
-
-
+This Business Requirement Document (BRD) outlines the requirements, objectives, and workflows for the PACER Page Request System, as derived from the provided .NET codebase. The document is intended to bridge the gap between technical implementation and business understanding, ensuring all stakeholders are aligned on system functionality, architecture, and expected outcomes.
 
 ---
 
+## Business Objectives
 
-
-\## Functional Requirements
-
-
-
-\### 1. Request Management
-
-\- Users can create, edit, and track PACER release requests.
-
-\- Requests must include required fields: request name, merch group, notes, change reason, effective date, approver, and organization selection.
-
-\- Users can enter styles/SKUs and prices via paste or CSV upload, with a limit of 500 entries per request.
-
-\- The system validates all inputs, including price formats, duplicate entries, and organization selections.
-
-\- Users can review and select items in a working list before submission.
-
-\- Requests are saved to the database with all associated details.
-
-
-
-\### 2. User Session Management
-
-\- User authentication and session state are maintained throughout the application.
-
-\- Session variables track user roles, permissions, and current request context.
-
-
-
-\### 3. Data Export
-
-\- Users can export request data and reports to Excel or CSV formats.
-
-\- Exported data reflects the latest validated and approved information.
-
-
-
-\### 4. Email Notification
-
-\- Automated email notifications are sent for request submission, approval, and status changes.
-
-\- Email templates are used for consistent communication.
-
-
-
-\### 5. Product \& SKU Management
-
-\- The system manages product and SKU data, including validation and association with requests.
-
-\- Bulk entry and validation of styles/SKUs and prices are supported.
-
-
-
-\### 6. Approval Workflow
-
-\- Requests undergo a review and approval process, with status tracking and notifications.
-
-\- Only authorized users can approve requests; once approved, requests are locked for editing.
-
-
-
-\### 7. File Upload
-
-\- Users can upload supporting documents (CSV files) for requests.
-
-\- Uploaded files are validated, parsed, and stored securely.
-
-
-
-\### 8. Calendar \& Dashboard
-
-\- Calendar views display request timelines and effective dates.
-
-\- Dashboards provide overviews of request statuses and metrics.
-
-
-
-\### 9. Search \& Review
-
-\- Users can search existing requests using various filters.
-
-\- Detailed review screens allow inspection of request details and history.
-
-
-
-\### 10. Styling \& Theming
-
-\- The application supports customizable themes and styles for branding and usability.
-
-
+- **Streamline Price Change Requests:** Automate and manage the process of submitting, validating, and approving price change requests for styles, SKUs, and color codes.
+- **Enhance Data Accuracy:** Ensure all price change requests are validated for correctness, completeness, and compliance with business rules before approval.
+- **Support Multi-Level Approval:** Facilitate a structured approval workflow involving Buyers, DMMs (Divisional Merchandise Managers), and Pricing teams.
+- **Enable Bulk Operations:** Allow users to upload bulk requests via CSV files, supporting efficient handling of large data sets.
+- **Audit and Visibility:** Provide logging, error tracking, and visibility controls for compliance and transparency.
 
 ---
 
+## Functional Requirements
 
+### 1. User Roles & Access
+- **Buyer:** Can create, edit, and submit price change requests.
+- **DMM (Approver):** Reviews and approves/rejects requests.
+- **Pricing:** Final approval and event creation.
+- **Super User:** Elevated permissions for testing and support.
+- **Visibility Users:** Additional users can be granted view access to specific requests.
 
-\## Non-Functional Requirements
+### 2. Request Creation & Editing
+- Users can create new PACER requests or edit existing ones.
+- Requests can be for styles, SKUs, or color codes.
+- Users must provide required information: request name, merch group, notes, reason, effective date, approver, and organizational level (chain/store).
+- The system validates required fields before allowing submission.
 
+### 3. Data Entry & Validation
+- Users can enter style/SKU/color data by pasting into a textbox or uploading a CSV file.
+- The system validates entries for:
+  - Format (numeric SKUs, valid price endings, non-zero prices)
+  - Duplicates
+  - Compliance with merch group and organizational rules
+  - Maximum entry limits (e.g., 500 items per request)
+- Invalid entries are highlighted and reported to the user.
 
+### 4. File Uploads
+- Users can upload CSV files for bulk style/SKU/color price changes.
+- The system parses, validates, and processes the uploaded data, providing feedback on errors or duplicates.
 
-\- \*\*Performance:\*\* The system must process and validate up to 500 style/SKU entries per request with minimal latency.
+### 5. Approval Workflow
+- Requests follow a multi-stage approval process:
+  - Buyer submits request.
+  - DMM reviews and approves/rejects.
+  - Pricing reviews and finalizes.
+- Status updates and error messages are communicated to users at each stage.
 
-\- \*\*Security:\*\* All user inputs must be validated and sanitized. File uploads are restricted to CSV format and scanned for malicious content. Sensitive data is encrypted using industry-standard cryptography (BouncyCastle).
+### 6. Error Handling & Feedback
+- The system provides real-time feedback on validation errors, missing data, and business rule violations.
+- Errors are displayed in user-friendly popups and error charts.
 
-\- \*\*Scalability:\*\* The application must support concurrent users and large data volumes, though current architecture is tightly coupled to Oracle DB and Web Forms.
-
-\- \*\*Reliability:\*\* Automated email notifications and data exports must be robust and recover gracefully from failures.
-
-\- \*\*Maintainability:\*\* Code should be modular, with business logic separated from presentation and data access layers.
-
-\- \*\*Compliance:\*\* The system must comply with relevant data protection regulations (e.g., GDPR).
-
-\- \*\*Auditability:\*\* All actions (submissions, approvals, exports) are logged for audit purposes.
-
-
+### 7. Visibility & Audit
+- All actions are logged for audit purposes.
+- Users can add or remove visibility users for each request.
+- The system tracks and logs user interactions and changes.
 
 ---
 
+## Non-Functional Requirements
 
+- **Performance:** The system must process uploads of up to 50,000 rows efficiently.
+- **Security:** Only authorized users can create, edit, or approve requests. Sensitive data is protected.
+- **Scalability:** The system must handle increasing numbers of requests and users without degradation.
+- **Reliability:** All actions (uploads, approvals, edits) must be logged and recoverable in case of failure.
+- **Usability:** The interface must provide clear feedback, error messages, and guidance for users.
 
-\## System Architecture
+---
 
+## System Architecture
 
+The PACER Page Request System is a web-based application built on ASP.NET Web Forms, utilizing a layered architecture:
 
-The PACER Release Request Application follows a layered architecture:
+- **Presentation Layer:** ASPX pages and code-behind files handle user interactions, form submissions, and UI logic.
+- **Business Logic Layer:** Classes in `App_Code` (e.g., `ProcBuilder`, `Pacer`, `AddPacer`) encapsulate business rules, validation, and workflow logic.
+- **Data Access Layer:** Data is accessed via stored procedures in an Oracle database, abstracted by classes like `PCRDAL` and invoked by business logic.
+- **Integration:** File parsing (CSV), bulk data operations, and email notifications are integrated into the workflow.
 
+---
 
+## Workflows and Diagrams
+
+### 1. Price Change Request Workflow
 
 ```mermaid
-
-graph TD
-
-A\[User Browser] --> B\[ASP.NET Web Forms (Presentation Layer)]
-
-B --> C\[App\_Code (Business Logic Layer)]
-
-C --> D\[DAL Classes (Data Access Layer)]
-
-D --> E\[Oracle Database]
-
-C --> F\[NPOI/SharpZipLib/GenericParsing (Excel/CSV/Compression)]
-
-C --> G\[BouncyCastle (Cryptography)]
-
-B --> H\[Bootstrap/DataTables/jQuery (Front-End Libraries)]
-
-```
-
-
-
-\*\*Description:\*\*
-
-\- \*\*Presentation Layer:\*\* ASPX pages and master page handle UI and user interactions.
-
-\- \*\*Business Logic Layer:\*\* App\_Code classes implement core logic, validation, and workflows.
-
-\- \*\*Data Access Layer:\*\* DAL classes abstract database operations, using Oracle Managed Data Access.
-
-\- \*\*External Libraries:\*\* NPOI for Excel, SharpZipLib for compression, GenericParsing for CSV, BouncyCastle for cryptography.
-
-\- \*\*Front-End:\*\* Bootstrap, DataTables, and jQuery for responsive UI and interactivity.
-
-
-
----
-
-
-
-\## Workflows and Diagrams
-
-
-
-\### 1. Request Submission Workflow
-
-
-
-```mermaid
-
 flowchart TD
-
-Start(\[Start]) --> Open\[User Opens Request Screen]
-
-Open --> Enter\[Enter Details \& Select Org]
-
-Enter --> PasteUpload\[Paste/Upload Styles/SKUs]
-
-PasteUpload --> Build\[Build Working List]
-
-Build --> Validate\[Validation Checks]
-
-Validate -->|Errors?| ShowErrors\[Show Errors, User Corrects]
-
-ShowErrors --> Build
-
-Validate -->|No Errors| Review\[Display GridView for Review]
-
-Review --> Select\[User Selects Items \& Submits]
-
-Select --> FinalVal\[Final Validation]
-
-FinalVal -->|Errors?| ShowFinalErrors\[Show Errors, User Corrects]
-
-ShowFinalErrors --> Build
-
-FinalVal -->|No Errors| Save\[Save to Database]
-
-Save --> Redirect\[Redirect to Review/Approval]
-
-Redirect --> End(\[End])
-
+    A[User Initiates Request] --> B[Enter Request Details]
+    B --> C{Data Entry Method}
+    C -- Paste --> D[Paste Style/SKU Data]
+    C -- Upload --> E[Upload CSV File]
+    D & E --> F[System Validates Data]
+    F --> G{Validation Success?}
+    G -- No --> H[Show Errors, Require Correction]
+    H --> D
+    G -- Yes --> I[Submit Request]
+    I --> J[Buyer Review]
+    J --> K[DMM Approval]
+    K --> L[Pricing Approval]
+    L --> M[Request Finalized]
 ```
 
-
-
-\### 2. Approval Workflow
-
-
+### 2. Data Validation Process
 
 ```mermaid
-
-sequenceDiagram
-
-participant User
-
-participant System
-
-participant Approver
-
-User->>System: Submit Request
-
-System->>Approver: Send Approval Notification
-
-Approver->>System: Review \& Approve/Reject
-
-System->>User: Notify Approval Status
-
-System->>DB: Update Request Status
-
-```
-
-
-
-\### 3. Database Relationship Diagram
-
-
-
-```mermaid
-
-erDiagram
-
-PACER\_HEADER ||--o{ PACER\_DETAILS : contains
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_STYLE : uploads
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_SKU : uploads
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_VALID : validates
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_LOC : locates
-
-PACER\_HEADER ||--o{ VISIBILITY\_USERS : has
-
-```
-
-
-
----
-
-
-
-\## Assumptions and Constraints
-
-
-
-\- Users have valid credentials and appropriate permissions to access the application.
-
-\- Only CSV files are accepted for bulk uploads; other formats are rejected.
-
-\- The application is tightly coupled to Oracle DB and ASP.NET Web Forms, limiting modernization and scalability.
-
-\- Maximum of 500 styles/SKUs can be processed per request.
-
-\- All business rules and validations are enforced at both UI and backend levels.
-
-\- Email notifications rely on external SMTP services, which must be available.
-
-\- No automated unit tests are present; manual testing is required.
-
-\- Error handling may not be comprehensive in all modules.
-
-\- Some configuration values may be hardcoded and require refactoring for flexibility.
-
-
-
----
-
-
-
-\## Glossary
-
-
-
-\- \*\*PACER:\*\* Public Access to Court Electronic Records; in this context, refers to internal release requests.
-
-\- \*\*ASPX:\*\* ASP.NET Web Forms page file.
-
-\- \*\*DAL:\*\* Data Access Layer, responsible for database interactions.
-
-\- \*\*SKU:\*\* Stock Keeping Unit, unique identifier for products.
-
-\- \*\*CSV:\*\* Comma-Separated Values, file format for data exchange.
-
-\- \*\*NPOI:\*\* .NET library for Excel file manipulation.
-
-\- \*\*BouncyCastle:\*\* Cryptography library for secure operations.
-
-\- \*\*GridView:\*\* UI component for displaying tabular data.
-
-\- \*\*Effective Date:\*\* The date when a request or change becomes active.
-
-\- \*\*Bulk Upload:\*\* Uploading multiple entries (styles/SKUs) at once via file.
-
-\- \*\*Visibility Users:\*\* Users with permission to view a specific request.
-
-\- \*\*INTRAWEEK:\*\* Special request type with unique business rules.
-
-\- \*\*Chain/Store/Custom/MPU:\*\* Types of organization selection for requests.
-
-\- \*\*Validation:\*\* Process of checking input data for correctness and completeness.
-
-\- \*\*Approval Workflow:\*\* Sequence of steps for reviewing and approving requests.
-
-\- \*\*Oracle Managed Data Access:\*\* .NET library for connecting to Oracle databases.
-
-\- \*\*Bootstrap/DataTables/jQuery:\*\* Front-end libraries for styling and interactivity.
-
-
-
----
-
-
-
-\## Mermaid Diagrams (Embedded)
-
-
-
-\### Request Submission Workflow
-
-
-
-```mermaid
-
 flowchart TD
-
-Start(\[Start]) --> Open\[User Opens Request Screen]
-
-Open --> Enter\[Enter Details \& Select Org]
-
-Enter --> PasteUpload\[Paste/Upload Styles/SKUs]
-
-PasteUpload --> Build\[Build Working List]
-
-Build --> Validate\[Validation Checks]
-
-Validate -->|Errors?| ShowErrors\[Show Errors, User Corrects]
-
-ShowErrors --> Build
-
-Validate -->|No Errors| Review\[Display GridView for Review]
-
-Review --> Select\[User Selects Items \& Submits]
-
-Select --> FinalVal\[Final Validation]
-
-FinalVal -->|Errors?| ShowFinalErrors\[Show Errors, User Corrects]
-
-ShowFinalErrors --> Build
-
-FinalVal -->|No Errors| Save\[Save to Database]
-
-Save --> Redirect\[Redirect to Review/Approval]
-
-Redirect --> End(\[End])
-
+    A[User Submits Data] --> B[Check Required Fields]
+    B --> C[Validate Numeric SKUs/Styles]
+    C --> D[Check for Duplicates]
+    D --> E[Validate Price Endings]
+    E --> F[Check Merch Group Compliance]
+    F --> G{All Valid?}
+    G -- No --> H[Show Error Messages]
+    G -- Yes --> I[Allow Submission]
 ```
 
-
-
-\### Approval Workflow
-
-
+### 3. Approval Workflow
 
 ```mermaid
-
 sequenceDiagram
-
-participant User
-
-participant System
-
-participant Approver
-
-User->>System: Submit Request
-
-System->>Approver: Send Approval Notification
-
-Approver->>System: Review \& Approve/Reject
-
-System->>User: Notify Approval Status
-
-System->>DB: Update Request Status
-
+    participant Buyer
+    participant DMM
+    participant Pricing
+    Buyer->>System: Submit Request
+    System->>DMM: Notify for Approval
+    DMM->>System: Approve/Reject
+    System->>Pricing: Notify for Final Approval
+    Pricing->>System: Approve/Reject
+    System->>Buyer: Notify Outcome
 ```
 
-
-
-\### Database Relationship Diagram
-
-
+### 4. Entity Relationship Overview
 
 ```mermaid
-
 erDiagram
-
-PACER\_HEADER ||--o{ PACER\_DETAILS : contains
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_STYLE : uploads
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_SKU : uploads
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_VALID : validates
-
-PACER\_HEADER ||--o{ PACER\_UPLOAD\_LOC : locates
-
-PACER\_HEADER ||--o{ VISIBILITY\_USERS : has
-
+    USER ||--o{ PACER_REQUEST : creates
+    PACER_REQUEST ||--o{ PACER_DETAIL : contains
+    PACER_REQUEST }o--|| DMM : "assigned to"
+    PACER_REQUEST }o--|| PRICING : "final approval"
+    PACER_REQUEST ||--o{ VISIBILITY_USER : "shared with"
 ```
-
-
-
-\### System Architecture Diagram
-
-
-
-```mermaid
-
-graph TD
-
-A\[User Browser] --> B\[ASP.NET Web Forms (Presentation Layer)]
-
-B --> C\[App\_Code (Business Logic Layer)]
-
-C --> D\[DAL Classes (Data Access Layer)]
-
-D --> E\[Oracle Database]
-
-C --> F\[NPOI/SharpZipLib/GenericParsing (Excel/CSV/Compression)]
-
-C --> G\[BouncyCastle (Cryptography)]
-
-B --> H\[Bootstrap/DataTables/jQuery (Front-End Libraries)]
-
-```
-
-
 
 ---
 
+## Assumptions and Constraints
 
+- Users must have valid credentials and appropriate roles to access system features.
+- All uploaded files must be in CSV format.
+- Maximum of 500 styles/SKUs per request via paste; up to 50,000 via upload.
+- Only numeric SKUs/styles are accepted.
+- Price endings must conform to allowed values (e.g., .09, .19, .99, etc.).
+- Intraweek events are not allowed at the store level.
+- The system is integrated with an Oracle database; all data operations use stored procedures.
+- The system must comply with corporate security and audit policies.
 
-\*End of Business Requirement Document (BRD)\*
+---
 
+## Glossary
+
+- **PACER:** Price Adjustment and Change Event Request.
+- **DMM:** Divisional Merchandise Manager, an approver in the workflow.
+- **SKU:** Stock Keeping Unit, a unique identifier for each product.
+- **Style:** A product style, may encompass multiple SKUs.
+- **Color Code:** Specific color variant of a style.
+- **Effective Date:** The date when the price change becomes active.
+- **Chain/Store:** Organizational levels for applying price changes.
+- **Original/Exception:** Types of price change requests (original markdown or exception).
+- **Bulk Upload:** Uploading large datasets via CSV files.
+- **Visibility User:** Additional user granted access to view a specific request.
+- **Validation:** System checks to ensure data correctness and compliance.
+- **Approval Workflow:** The process of reviewing and approving requests by different roles.
+
+---
+
+# End of Document
+```
